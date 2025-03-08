@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - '8068:8080'
+      - '8068:8068'
       - '1337:8080'
       - '7910:7900'
     environment:
