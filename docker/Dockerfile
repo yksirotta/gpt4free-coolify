@@ -53,4 +53,4 @@ RUN pip install --break-system-packages --upgrade pip \
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
 
 # Expose ports
-EXPOSE 8080 7900
+EXPOSE 8080 8068 7900 1337
