@@ -6,6 +6,7 @@ ENV G4F_VERSION $G4F_VERSION
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
 ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
+ENV PATH="$HOME/.local/bin:$PATH"
 
 USER root
 
@@ -52,4 +53,4 @@ RUN pip install --break-system-packages --upgrade pip \
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
 
 # Expose ports
-EXPOSE 8080 7900
+EXPOSE 8080 8068 7900 1337
