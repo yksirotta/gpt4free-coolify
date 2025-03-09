@@ -9,11 +9,10 @@ services:
       dockerfile: docker/Dockerfile
     volumes:
       - .:/app
+    ports:
+      - '10555:10555'
+      - '8068:8068'
+      - '1337:8080'
+      - '7910:7910'
     environment:
       - OLLAMA_HOST=host.docker.internal
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:10555/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
