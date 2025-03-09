@@ -13,7 +13,8 @@ services:
       - '1337:8080'
       - '7910:7910'
     volumes:
-      -./har_and_cookies:/app/har_and_cookies
-      -./generated_images:/app/generated_images
+      - .:/app
+      - ./har_and_cookies:/app/har_and_cookies
+      - ./generated_images:/app/generated_images
     environment:
       - OLLAMA_HOST=host.docker.internal
