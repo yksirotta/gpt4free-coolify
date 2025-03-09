@@ -14,7 +14,7 @@ services:
       - '7910:7910'
     volumes:
       - .:/app
-      - ./har_and_cookies:/app/har_and_cookies
-      - ./generated_images:/app/generated_images
+      - /artifacts/har_and_cookies:/app/har_and_cookies
+      - /artifacts/generated_images:/app/generated_images
     environment:
       - OLLAMA_HOST=host.docker.internal
