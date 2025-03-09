@@ -12,6 +12,6 @@ services:
       - '1337:8080'
       - '7910:7910'
     volumes:
-      - ./app
+      - .:/app
     environment:
       - OLLAMA_HOST=host.docker.internal
