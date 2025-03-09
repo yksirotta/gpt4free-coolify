@@ -5,7 +5,7 @@ ENV G4F_VERSION $G4F_VERSION
 
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
-ENV G4F_LOGIN_URL http://localhost:7910/?autoconnect=1&resize=scale&password=secret
+ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
 
 USER root
