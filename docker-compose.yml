@@ -12,7 +12,7 @@ services:
     ports:
       - '8068:8068'
       - '1337:8080'
-      - '7910:7910'
+      - '7910:7900'
     environment:
       - OLLAMA_HOST=host.docker.internal
     healthcheck:
