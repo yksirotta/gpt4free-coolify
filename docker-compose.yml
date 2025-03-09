@@ -17,7 +17,7 @@ services:
     environment:
       - OLLAMA_HOST=host.docker.internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8068/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:10555/health"]
       interval: 30s
       timeout: 10s
       retries: 3
