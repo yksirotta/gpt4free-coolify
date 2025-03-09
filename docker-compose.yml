@@ -15,4 +15,4 @@ services:
       - ./har_and_cookies:/app/har_and_cookies
       - ./generated_images:/app/generated_images
     environment:
-      - OLLAMA_HOST=host.docker.interna
+      - OLLAMA_HOST=host.docker.internal
