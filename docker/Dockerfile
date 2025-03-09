@@ -52,9 +52,11 @@ RUN pip install --break-system-packages --upgrade pip \
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
 
-# Set permissions for the directories
+# Set permissions and ownership for directories
 RUN mkdir -p /app/har_and_cookies /app/generated_images && \
-    chmod -R 755 /app/har_and_cookies /app/generated_images
+    touch /app/har_and_cookies/.scrape_cache && \
+    chmod -R 755 /app/har_and_cookies /app/generated_images && \
+    chown -R $SEL_UID:$SEL_GID /app/har_and_cookies /app/generated_images
 
 # Expose ports
 EXPOSE 8068 8080 10555 7900 7910 1337
