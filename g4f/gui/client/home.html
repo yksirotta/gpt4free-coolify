@@ -223,36 +223,89 @@
         <iframe class="stream-widget" frameborder="0"></iframe>
     </div>
     <script>
-const today = new Date().toJSON().slice(0, 10);
-const max = 5;
-const cache_id = Math.floor(Math.random() * max);
-
-let prompt;
-if (cache_id % 2 == 0) {
-    // Seasonal screensaver prompt based on the current date
-    prompt = `
-        Today is ${today}.
-        Create a single-page HTML screensaver reflecting the current season (based on the date).
-        Avoid using any text.
-    `;
-} else {
-    // Generic screensaver prompt
-    prompt = `Create a single-page HTML screensaver. Avoid using any text.`;
-}
-
-// Fetch the screensaver HTML content from the backend API
-fetch(`/backend-api/v2/create?prompt=${prompt}&filter_markdown=html&cache=${cache_id}`)
-    .then(response => response.text())
-    .then(text => {
-        // Set the screensaver content as the source of the background element
-        background.src = `data:text/html;charset=utf-8,${encodeURIComponent(text)}`;
-        
-        // Hide the gradient element if it exists
-        const gradient = document.querySelector('.gradient');
-        if (gradient) {
-            gradient.classList.add('hidden');
+        const iframe = document.querySelector('.stream-widget');
+        const rand_idx = Math.floor(Math.random() * 12)
+        if (rand_idx < 3) {
+            search = "xtekky/gpt4free releases";
+        } else if (rand_idx < 6) {
+            search = "developer news";
+        } else {
+            search = (navigator.language == "fi" ? "news in finnish" : navigator.language == "en" ? "world news" : `news in ${navigator.language}`);
         }
-    });
+        const summary_prompt = "Present the news from the search results in a clear and organized markdown format. Include a headline, a brief summary, key points, and one or more relevant images with proper attribution. Ensure the content is concise, well-structured, and visually appealing.";
+        const url = `/backend-api/v2/create?prompt=${summary_prompt}&stream=1&web_search=${search}`;
+        iframe.src = url;
+        const message = "Loading...";
+        setTimeout(()=>{
+            iframe.classList.add('show');
+            const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
+            if (iframeDocument) {
+                const iframeBody = iframeDocument.querySelector("body");
+                if (iframeBody) {
+                    iframeBody.innerHTML = message + iframeBody.innerHTML;
+                }
+            } else {
+                iframe.parentElement.removeChild(iframe);
+            }
+        }, 1000);
+
+        function filterMarkdown(text, allowedTypes = null, defaultValue = null) {
+            const match = text.match(/```(.+)\n(?<code>[\s\S]+?)(\n```|$)/);
+            if (match) {
+                const [, type, code] = match;
+                if (!allowedTypes || allowedTypes.includes(type)) {
+                    return code;
+                }
+            }
+            return defaultValue;
+        }
+
+        let scroll_to_bottom_callback = () => {
+            const i = document.querySelector(".stream-widget");
+            if (!i.contentWindow || !i.contentDocument) {
+                return;
+            }
+            clientHeight = i.contentDocument.body?.scrollHeight;
+            i.contentWindow.scrollTo(0, clientHeight);
+            if (clientHeight - i.contentWindow.scrollY < 2 * clientHeight) {
+                setTimeout(scroll_to_bottom_callback, 1000);
+            }
+        };
+        setTimeout(scroll_to_bottom_callback, 1000);
+
+        iframe.onload = () => {
+            const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+            const iframeContent = iframeDocument.querySelector("pre");
+            let iframeText = iframeContent.innerHTML;
+            const markdown = window.markdownit();
+            const iframeContainer = document.querySelector(".container");
+            iframe.remove()
+            if (iframeText.indexOf('"error"') < 0) {
+                iframeContainer.innerHTML += `<div class="stream-widget show">${markdown.render(filterMarkdown(iframeText, "markdown", iframeText))}</div>`;
+            }
+            scroll_to_bottom_callback = () => null;
+        }
+
+        (async () => {
+            const today = new Date().toJSON().slice(0, 10);
+            const max = 5;
+            const cache_id = Math.floor(Math.random() * max);
+            let prompt;
+            if (cache_id % 2 == 0) {
+                prompt = `
+                Today is ${new Date().toJSON().slice(0, 10)}.
+                Create a single-page HTML screensaver reflecting the current season (based on the date).
+                Avoid using any text.`;
+            } else {
+                prompt = `Create a single-page HTML screensaver. Avoid using any text.`;
+                const response = await fetch(`/backend-api/v2/create?prompt=${prompt}&filter_markdown=html&cache=${cache_id}`);
+            }
+            const response = await fetch(`/backend-api/v2/create?prompt=${prompt}&filter_markdown=html&cache=${cache_id}`);
+            const text = await response.text()
+            background.src = `data:text/html;charset=utf-8,${encodeURIComponent(text)}`;
+            const gradient = document.querySelector('.gradient');
+            gradient.classList.add('hidden');
+        })();
     </script>
 </body>
 </html>
