@@ -5,7 +5,7 @@ ENV G4F_VERSION $G4F_VERSION
 
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
-ENV G4F_LOGIN_URL http://g4f.yksirotta.fi:7900/?autoconnect=1&resize=scale&password=secret
+ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
 
 USER root
@@ -20,17 +20,11 @@ fi
 RUN apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
-    apt-get -qqy install python3 python-is-python3 python3-pip python3-venv build-essential g++ python3-dev liblapack-dev libopenblas-dev && \
+    apt-get -qqy install python3 python-is-python3 pip && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-# Create and activate a virtual environment
-RUN python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir spacy && \
-    /venv/bin/pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
 
 # Update entrypoint
 COPY docker/supervisor.conf /etc/supervisor/conf.d/selenium.conf
@@ -52,8 +46,8 @@ WORKDIR $G4F_DIR
 COPY requirements.txt $G4F_DIR
 
 # Upgrade pip for the latest features and install the project's Python dependencies.
-RUN /venv/bin/pip install --break-system-packages --upgrade pip && \
-    /venv/bin/pip install --break-system-packages -r requirements.txt
+RUN pip install --break-system-packages --upgrade pip && \
+    pip install --break-system-packages -r requirements.txt
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
