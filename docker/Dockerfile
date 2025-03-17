@@ -18,6 +18,9 @@ fi
 
 # Install Python3, pip, remove OpenJDK 11, clean up
 RUN apt-get -qqy update && \
+    apt-get -qqy install software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
     apt-get -qqy install python3 python-is-python3 pip && \
