@@ -15,8 +15,3 @@ services:
       - .:/app
     environment:
       - OLLAMA_HOST=host.docker.internal
-  localhost:
-    ports:
-      - '7900:7900'
-    environment:
-      - OLLAMA_HOST=host.docker.internal
