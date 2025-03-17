@@ -55,7 +55,7 @@ RUN pip install --break-system-packages spacy
 # Download the spaCy model directly
 RUN mkdir -p /usr/local/lib/python3.12/site-packages/en_core_web_sm
 RUN curl -L -o /usr/local/lib/python3.12/site-packages/en_core_web_sm/en_core_web_sm-3.0.0.tar.gz https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
-RUN tar -xzf /usr/local/lib/python3.12/site-packages/en_core_web_sm/en_core_web_sm-3.0.0.tar.gz -C /usr/local/lib/python3.9/site-packages/en_core_web_sm
+RUN tar -xzf /usr/local/lib/python3.12/site-packages/en_core_web_sm/en_core_web_sm-3.0.0.tar.gz -C /usr/local/lib/python3.12/site-packages/en_core_web_sm
 RUN python -m spacy link en_core_web_sm en_core_web_sm
 
 # Copy the entire package into the container.
