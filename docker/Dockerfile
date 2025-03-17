@@ -26,12 +26,13 @@ RUN apt-get -qqy update && \
     apt-get -qyy clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-# Create and activate a virtual environment
-RUN python3 -m venv /venv  # Create a virtual environment
+# Create a Python virtual environment
+RUN python3 -m venv $VIRTUAL_ENV
 
-# Upgrade pip and install spaCy in the virtual environment
-RUN /venv/bin/pip install --no-cache-dir --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir spacy
+# Upgrade pip and install spaCy within the virtual environment
+RUN $VIRTUAL_ENV/bin/pip install --upgrade pip && \
+    $VIRTUAL_ENV/bin/pip install spacy && \
+    $VIRTUAL_ENV/bin/python -m spacy download en_core_web_sm
 
 # Install the spaCy model directly
 RUN /venv/bin/python -m spacy download en_core_web_sm
