@@ -20,7 +20,7 @@ fi
 RUN apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
-    apt-get -qqy install python3 python-is-python3 python3-pip python3-venv && \
+    apt-get -qqy install python3 python-is-python3 python3-pip python3-venv build-essential g++ python3-dev && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
@@ -29,8 +29,8 @@ RUN apt-get -qqy update && \
 # Create and activate a virtual environment
 RUN python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir spacy \
-    && /venv/bin/pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
+    /venv/bin/pip install --no-cache-dir spacy && \
+    /venv/bin/pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
 
 # Update entrypoint
 COPY docker/supervisor.conf /etc/supervisor/conf.d/selenium.conf
@@ -52,8 +52,8 @@ WORKDIR $G4F_DIR
 COPY requirements.txt $G4F_DIR
 
 # Upgrade pip for the latest features and install the project's Python dependencies.
-RUN pip install --break-system-packages --upgrade pip && \
-    pip install --break-system-packages -r requirements.txt
+RUN /venv/bin/pip install --break-system-packages --upgrade pip && \
+    /venv/bin/pip install --break-system-packages -r requirements.txt
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
