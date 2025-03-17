@@ -20,11 +20,21 @@ fi
 RUN apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
-    apt-get -qqy install python3 python-is-python3 pip && \
+   apt-get -qqy install python3 python3-pip python3-venv build-essential g++ python3-dev && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+# Create and activate a virtual environment
+RUN python3 -m venv /venv  # Create a virtual environment
+
+# Upgrade pip and install spaCy in the virtual environment
+RUN /venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir spacy
+
+# Install the spaCy model directly
+RUN /venv/bin/python -m spacy download en_core_web_sm
 
 # Update entrypoint
 COPY docker/supervisor.conf /etc/supervisor/conf.d/selenium.conf
