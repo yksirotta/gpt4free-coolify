@@ -5,10 +5,10 @@ ENV G4F_VERSION $G4F_VERSION
 
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
-ENV VIRTUAL_ENV=/opt/venv         # Set the path for the virtual environment
+ENV VIRTUAL_ENV=/opt/venv         
 ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"  # Add the virtual environment to PATH
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"  
 
 USER root
 
