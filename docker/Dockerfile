@@ -26,6 +26,12 @@ RUN apt-get -qqy update && \
     apt-get -qyy clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
+# Create and activate a virtual environment
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir spacy \
+    && /venv/bin/pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0.tar.gz
+
 # Update entrypoint
 COPY docker/supervisor.conf /etc/supervisor/conf.d/selenium.conf
 COPY docker/supervisor-api.conf /etc/supervisor/conf.d/api.conf
@@ -48,15 +54,6 @@ COPY requirements.txt $G4F_DIR
 # Upgrade pip for the latest features and install the project's Python dependencies.
 RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
-
-# Clone the spaCy repository and install it
-RUN git clone https://github.com/explosion/spaCy.git && \
-    cd spaCy && \
-    pip install --no-cache-dir . && \
-    python3 -m spacy download en_core_web_sm
-
-# Clean up
-RUN rm -rf spaCy
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
