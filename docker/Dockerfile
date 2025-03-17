@@ -21,6 +21,7 @@ RUN apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
     apt-get -qqy install python3 python-is-python3 pip && \
+    apt-get -qqy install python3-spacy && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
@@ -49,11 +50,8 @@ COPY requirements.txt $G4F_DIR
 RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
-# Install spaCy
-RUN python -m pip install --no-cache-dir spacy
-
 # Install spaCy model directly using pip
-RUN python -m pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.4/en_core_web_sm-3.4.4.tar.gz
+RUN pip install --no-cache-dir en-core-web-sm
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
