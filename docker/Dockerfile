@@ -6,24 +6,25 @@ ENV G4F_VERSION $G4F_VERSION
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
 ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
+ENV PATH="$HOME/.local/bin:$PATH"
 
 USER root
 
-#  If docker compose, install git
-RUN if [ "$G4F_VERSION" = "" ] ; then \
-  apt-get -qqy update && \
-  apt-get -qqy install git \
-  ; fi
+# If docker compose, install git
+RUN if [ "$G4F_VERSION" = "" ]; then \
+    apt-get -qqy update && \
+    apt-get -qqy install git; \
+fi
 
 # Install Python3, pip, remove OpenJDK 11, clean up
-RUN apt-get -qqy update \
-  && apt-get -qqy upgrade \
-  && apt-get -qyy autoremove \
-  && apt-get -qqy install python3 python-is-python3 pip \
-  && apt-get -qyy remove openjdk-11-jre-headless \
-  && apt-get -qyy autoremove \
-  && apt-get -qyy clean \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+RUN apt-get -qqy update && \
+    apt-get -qqy upgrade && \
+    apt-get -qyy autoremove && \
+    apt-get -qqy install python3 python-is-python3 pip && \
+    apt-get -qyy remove openjdk-11-jre-headless && \
+    apt-get -qyy autoremove && \
+    apt-get -qyy clean && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Update entrypoint
 COPY docker/supervisor.conf /etc/supervisor/conf.d/selenium.conf
@@ -45,11 +46,17 @@ WORKDIR $G4F_DIR
 COPY requirements.txt $G4F_DIR
 
 # Upgrade pip for the latest features and install the project's Python dependencies.
-RUN pip install --break-system-packages --upgrade pip \
-  && pip install --break-system-packages -r requirements.txt
+RUN pip install --break-system-packages --upgrade pip && \
+    pip install --break-system-packages -r requirements.txt
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
 
+# Ensure the necessary directories exist and set the correct permissions
+RUN mkdir -p $G4F_DIR/har_and_cookies $G4F_DIR/generated_images && \
+    touch $G4F_DIR/har_and_cookies/.scrape_cache && \
+    chmod -R 755 $G4F_DIR/har_and_cookies $G4F_DIR/generated_images && \
+    chown -R $SEL_UID:$SEL_GID $G4F_DIR/har_and_cookies $G4F_DIR/generated_images
+
 # Expose ports
-EXPOSE 8080 7900
+EXPOSE 10555 7900 1337
