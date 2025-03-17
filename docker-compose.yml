@@ -7,10 +7,10 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     ports:
-      - '10555:10554'
+      - '10556:10555'
       - '8068:8068'
-      - '10555:1337'
-      - '10555:7900'
+      - '10556:1337'
+      - '10556:7900'
     volumes:
       - .:/app
     environment:
