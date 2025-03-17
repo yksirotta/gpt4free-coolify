@@ -49,9 +49,11 @@ COPY requirements.txt $G4F_DIR
 RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
-# Install spaCy and the model
-RUN pip install --no-cache-dir spacy && \
-    pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.4/en_core_web_sm-3.4.4.tar.gz
+# Install spaCy
+RUN pip install --no-cache-dir --user spacy
+
+# Install spaCy model directly using pip
+RUN pip install --no-cache-dir --user https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.4/en_core_web_sm-3.4.4.tar.gz
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
