@@ -18,13 +18,9 @@ fi
 
 # Install Python3, pip, remove OpenJDK 11, clean up
 RUN apt-get -qqy update && \
-    apt-get -qqy install software-properties-common && \
-    add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
     apt-get -qqy install python3 python-is-python3 pip && \
-    apt-get -qqy install python3-spacy && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
@@ -53,8 +49,14 @@ COPY requirements.txt $G4F_DIR
 RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
-# Install spaCy model directly using pip
-RUN pip install --no-cache-dir en-core-web-sm
+# Clone the spaCy repository and install it
+RUN git clone https://github.com/explosion/spaCy.git && \
+    cd spaCy && \
+    pip install --no-cache-dir . && \
+    python3 -m spacy download en_core_web_sm
+
+# Clean up
+RUN rm -rf spaCy
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
