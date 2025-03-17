@@ -49,8 +49,8 @@ COPY requirements.txt $G4F_DIR
 RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
-# Download the English model
-RUN python -m spacy download en_core_web_sm
+# Install spaCy
+RUN pip install --no-cache-dir spacy
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
