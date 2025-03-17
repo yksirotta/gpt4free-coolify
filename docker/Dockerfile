@@ -6,7 +6,7 @@ ENV G4F_VERSION $G4F_VERSION
 ENV SE_SCREEN_WIDTH 1850
 ENV G4F_DIR /app
 ENV VIRTUAL_ENV=/opt/venv         
-ENV G4F_LOGIN_URL http://localhost:7900/?autoconnect=1&resize=scale&password=secret
+ENV G4F_LOGIN_URL http://g4f.yksirotta.fi:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"  
 
@@ -28,8 +28,10 @@ RUN apt-get -qqy update && \
     apt-get -qyy clean && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-# Create the virtual environment
-RUN python3 -m venv $VIRTUAL_ENV 
+# Create and fix permissions for the virtual environment
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+RUN chown -R $SEL_UID:$SEL_GID $VIRTUAL_ENV
 
 # Upgrade pip and install spaCy in the virtual environment
 RUN $VIRTUAL_ENV/bin/pip install --upgrade pip && \
