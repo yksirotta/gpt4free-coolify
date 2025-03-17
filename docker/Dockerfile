@@ -36,9 +36,6 @@ COPY docker/background.png /usr/share/images/fluxbox/ubuntu-light.png
 # Add user, fix permissions
 RUN chown "${SEL_UID}:${SEL_GID}" $HOME/.local
 
-# Switch user
-USER $SEL_UID
-
 # Set the working directory in the container.
 WORKDIR $G4F_DIR
 
@@ -52,11 +49,8 @@ RUN pip install --break-system-packages --upgrade pip && \
 # Install spaCy
 RUN pip install --break-system-packages spacy
 
-# Root User for Installing Models
-USER root
-
 # Download and install the spaCy model
-RUN python -m spacy download en_core_web_sm
+RUN pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.4/en_core_web_sm-3.4.4.tar.gz
 
 # Switch user
 USER $SEL_UID
