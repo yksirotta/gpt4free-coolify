@@ -52,11 +52,17 @@ RUN pip install --break-system-packages --upgrade pip && \
 # Install spaCy
 RUN pip install --break-system-packages spacy
 
+# Root User for Installing Models
+USER root
+
 # Download the spaCy model directly
 RUN mkdir -p /usr/local/lib/python3.12/site-packages/en_core_web_sm
 RUN curl -L -o /usr/local/lib/python3.12/site-packages/en_core_web_sm/en_core_web_sm-3.0.0.tar.gz https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 RUN tar -xzf /usr/local/lib/python3.12/site-packages/en_core_web_sm/en_core_web_sm-3.0.0.tar.gz -C /usr/local/lib/python3.12/site-packages/en_core_web_sm
 RUN python -m spacy link en_core_web_sm en_core_web_sm
+
+# Switch user
+USER $SEL_UID
 
 # Copy the entire package into the container.
 ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
