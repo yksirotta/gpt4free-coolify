@@ -20,7 +20,7 @@ fi
 RUN apt-get -qqy update && \
     apt-get -qqy upgrade && \
     apt-get -qyy autoremove && \
-    apt-get -qqy install python3 python-is-python3 python3-pip python3-venv build-essential g++ python3-dev && \
+    apt-get -qqy install python3 python-is-python3 python3-pip python3-venv build-essential g++ python3-dev libblacs-dev liblapack-dev libopenblas-dev && \
     apt-get -qyy remove openjdk-11-jre-headless && \
     apt-get -qyy autoremove && \
     apt-get -qyy clean && \
