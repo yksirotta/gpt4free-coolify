@@ -6,7 +6,7 @@ services:
     shm_size: '2gb'
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - '10555:10555'
       - '1337:10555'
