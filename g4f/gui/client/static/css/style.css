@@ -98,22 +98,17 @@ body:not(.white) a:visited{
     display: flex;
     gap: 10px;
     height: 100%;
-    max-width: 1200px; /* Set a max width for the row */
-    margin: 0 auto; /* Center the row in the middle of the page */
-    padding: 20px; /* Optional: Add some padding */
 }
 
 .box {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background-color: var(--blur-bg);
-    height: auto; /* Change to auto to allow for flexible height */
-    width: 100%; /* Keep width at 100% to fill the row */
+    height: 100%;
+    width: 100%;
     border-radius: var(--border-radius-1);
     border: 1px solid var(--blur-border);
-    flex: 1; /* Allow boxes to grow and fill the space */
-    min-width: 300px; /* Set a minimum width for the boxes */
-    max-width: 400px; /* Set a maximum width for the boxes */
+}
 
 .new_version {
     position: absolute;
