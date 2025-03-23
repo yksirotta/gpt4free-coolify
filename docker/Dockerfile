@@ -4,7 +4,7 @@ ARG G4F_VERSION
 ENV G4F_VERSION=$G4F_VERSION
 
 ENV SE_SCREEN_WIDTH=1850
-ENV G4F_DIR=/g4f
+ENV G4F_DIR=/
 ENV VIRTUAL_ENV=/opt/venv         
 ENV G4F_LOGIN_URL=http://g4f.yksirotta.fi:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
