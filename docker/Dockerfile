@@ -50,8 +50,9 @@ COPY docker/background.png /usr/share/images/fluxbox/ubuntu-light.png
 # Add user, fix permissions
 RUN chown "${SEL_UID}:${SEL_GID}" $HOME/.local
 
-# Change ownership of the pip cache directory
-RUN chown -R $SEL_UID:$SEL_GID /home/seluser/.cache/pip
+# Create the pip cache directory and change ownership
+RUN mkdir -p /home/seluser/.cache/pip && \
+    chown -R $SEL_UID:$SEL_GID /home/seluser/.cache/pip
 
 # Switch user
 USER $SEL_UID
