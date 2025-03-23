@@ -68,7 +68,7 @@ RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
 # Copy the entire package into the container.
-ADD --chown=$SEL_UID:$SEL_GID ../g4f $G4F_DIR/g4f
+ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
 
 # Ensure the necessary directories exist and set the correct permissions
 RUN mkdir -p $G4F_DIR/har_and_cookies $G4F_DIR/generated_images && \
