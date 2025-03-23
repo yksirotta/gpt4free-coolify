@@ -4,7 +4,7 @@ ARG G4F_VERSION
 ENV G4F_VERSION=$G4F_VERSION
 
 ENV SE_SCREEN_WIDTH=1850
-ENV G4F_DIR=/
+ENV G4F_DIR=/app
 ENV VIRTUAL_ENV=/opt/venv         
 ENV G4F_LOGIN_URL=http://g4f.yksirotta.fi:7900/?autoconnect=1&resize=scale&password=secret
 ENV PATH="$HOME/.local/bin:$PATH"
@@ -68,7 +68,7 @@ RUN pip install --break-system-packages --upgrade pip && \
     pip install --break-system-packages -r requirements.txt
 
 # Copy the entire package into the container.
-ADD --chown=$SEL_UID:$SEL_GID g4f $G4F_DIR/g4f
+ADD --chown=$SEL_UID:$SEL_GID ../g4f $G4F_DIR/g4f
 
 # Ensure the necessary directories exist and set the correct permissions
 RUN mkdir -p $G4F_DIR/har_and_cookies $G4F_DIR/generated_images && \
