@@ -8,7 +8,8 @@ import asyncio
 import shutil
 import random
 import datetime
-from flask import Flask, Response, request, jsonify, render_template
+import tempfile
+from flask import Flask, Response, request, jsonify, render_template, send_from_directory
 from typing import Generator
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -22,6 +23,7 @@ from ...client.helper import filter_markdown
 from ...tools.files import supports_filename, get_streaming, get_bucket_dir, get_buckets
 from ...tools.run_tools import iter_run_tools
 from ...errors import ProviderNotFoundError
+from ...image import is_allowed_extension
 from ...cookies import get_cookies_dir
 from ... import ChatCompletion
 from ... import models
@@ -64,6 +66,10 @@ class Backend_Api(Api):
             @app.route('/', methods=['GET'])
             def home():
                 return render_template('home.html')
+
+        @app.route('/qrcode', methods=['GET'])
+        def qrcode():
+            return render_template('qrcode.html')
 
         @app.route('/backend-api/v2/models', methods=['GET'])
         def jsonify_models(**kwargs):
@@ -111,11 +117,13 @@ class Backend_Api(Api):
             else:
                 json_data = request.json
             if "files" in request.files:
-                images = []
+                media = []
                 for file in request.files.getlist('files'):
                     if file.filename != '' and is_allowed_extension(file.filename):
-                        images.append((to_image(file.stream, file.filename.endswith('.svg')), file.filename))
-                json_data['images'] = images
+                        newfile = tempfile.TemporaryFile()
+                        shutil.copyfileobj(file.stream, newfile)
+                        media.append((newfile, file.filename))
+                json_data['media'] = media
 
             if app.demo and not json_data.get("provider"):
                 model = json_data.get("model")
@@ -299,20 +307,38 @@ class Backend_Api(Api):
         def upload_files(bucket_id: str):
             bucket_id = secure_filename(bucket_id)
             bucket_dir = get_bucket_dir(bucket_id)
+            media_dir = os.path.join(bucket_dir, "media")
             os.makedirs(bucket_dir, exist_ok=True)
             filenames = []
+            media = []
             for file in request.files.getlist('files'):
                 try:
                     filename = secure_filename(file.filename)
-                    if supports_filename(filename):
-                        with open(os.path.join(bucket_dir, filename), 'wb') as f:
-                            shutil.copyfileobj(file.stream, f)
+                    if is_allowed_extension(filename):
+                        os.makedirs(media_dir, exist_ok=True)
+                        newfile = os.path.join(media_dir, filename)
+                        media.append(filename)
+                    elif supports_filename(filename):
+                        newfile = os.path.join(bucket_dir, filename)
                         filenames.append(filename)
+                    else:
+                        continue
+                    with open(newfile, 'wb') as f:
+                        shutil.copyfileobj(file.stream, f)
                 finally:
                     file.stream.close()
             with open(os.path.join(bucket_dir, "files.txt"), 'w') as f:
                 [f.write(f"{filename}\n") for filename in filenames]
-            return {"bucket_id": bucket_id, "files": filenames}
+            return {"bucket_id": bucket_id, "files": filenames, "media": media}
+
+        @app.route('/backend-api/v2/files/<bucket_id>/media/<filename>', methods=['GET'])
+        def get_media(bucket_id, filename):
+            bucket_id = secure_filename(bucket_id)
+            bucket_dir = get_bucket_dir(bucket_id)
+            media_dir = os.path.join(bucket_dir, "media")
+            if os.path.exists(media_dir):
+                return send_from_directory(os.path.abspath(media_dir), filename)
+            return "File not found", 404
 
         @app.route('/backend-api/v2/files/<bucket_id>/<filename>', methods=['PUT'])
         def upload_file(bucket_id, filename):

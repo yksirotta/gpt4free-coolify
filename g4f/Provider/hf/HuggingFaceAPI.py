@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 
 from ...providers.types import Messages
-from ...typing import ImagesType
+from ...typing import MediaListType
 from ...requests import StreamSession, raise_for_status
 from ...errors import ModelNotSupportedError
 from ...providers.helper import get_last_user_message
@@ -75,11 +75,11 @@ class HuggingFaceAPI(OpenaiTemplate):
         api_key: str = None,
         max_tokens: int = 2048,
         max_inputs_lenght: int = 10000,
-        images: ImagesType = None,
+        media: MediaListType = None,
         **kwargs
     ):
         if model == llama_models["name"]:
-            model = llama_models["text"] if images is None else llama_models["vision"]
+            model = llama_models["text"] if media is None else llama_models["vision"]
         if model in cls.model_aliases:
             model = cls.model_aliases[model]
         provider_mapping = await cls.get_mapping(model, api_key)
@@ -92,18 +92,18 @@ class HuggingFaceAPI(OpenaiTemplate):
             model = provider_mapping[provider_key]["providerId"]
             yield ProviderInfo(**{**cls.get_dict(), "label": f"HuggingFace ({provider_key})"})
             break
-        start = calculate_lenght(messages)
-        if start > max_inputs_lenght:
-            if len(messages) > 6:
-                messages = messages[:3] + messages[-3:]
-            if calculate_lenght(messages) > max_inputs_lenght:
-                last_user_message = [{"role": "user", "content": get_last_user_message(messages)}]
-                if len(messages) > 2:
-                    messages = [m for m in messages if m["role"] == "system"] + last_user_message
-                if len(messages) > 1 and calculate_lenght(messages) > max_inputs_lenght:
-                    messages = last_user_message
-            debug.log(f"Messages trimmed from: {start} to: {calculate_lenght(messages)}")
-        async for chunk in super().create_async_generator(model, messages, api_base=api_base, api_key=api_key, max_tokens=max_tokens, images=images, **kwargs):
+        # start = calculate_lenght(messages)
+        # if start > max_inputs_lenght:
+        #     if len(messages) > 6:
+        #         messages = messages[:3] + messages[-3:]
+        #     if calculate_lenght(messages) > max_inputs_lenght:
+        #         last_user_message = [{"role": "user", "content": get_last_user_message(messages)}]
+        #         if len(messages) > 2:
+        #             messages = [m for m in messages if m["role"] == "system"] + last_user_message
+        #         if len(messages) > 1 and calculate_lenght(messages) > max_inputs_lenght:
+        #             messages = last_user_message
+        #     debug.log(f"Messages trimmed from: {start} to: {calculate_lenght(messages)}")
+        async for chunk in super().create_async_generator(model, messages, api_base=api_base, api_key=api_key, max_tokens=max_tokens, media=media, **kwargs):
             yield chunk
 
 def calculate_lenght(messages: Messages) -> int:

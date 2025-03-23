@@ -3,19 +3,20 @@ from __future__ import annotations
 import json
 import uuid
 
-from ...typing import AsyncResult, Messages, Cookies, ImagesType
+from ...typing import AsyncResult, Messages, Cookies, MediaListType
 from ..base_provider import AsyncGeneratorProvider, ProviderModelMixin
 from ..helper import format_prompt, format_image_prompt
 from ...providers.response import JsonConversation
 from ...requests.aiohttp import StreamSession, StreamResponse, FormData
 from ...requests.raise_for_status import raise_for_status
-from ...image import to_bytes, is_accepted_format, is_data_an_wav
+from ...image import to_bytes, is_accepted_format, is_data_an_audio
 from ...errors import ResponseError
 from ... import debug
-from .Janus_Pro_7B import get_zerogpu_token
+from .DeepseekAI_JanusPro7b import get_zerogpu_token
 from .raise_for_status import raise_for_status
 
-class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
+class Microsoft_Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
+    label = "Microsoft Phi-4"
     space = "microsoft/phi-4-multimodal"
     url = f"https://huggingface.co/spaces/{space}"
     api_url = "https://microsoft-phi-4-multimodal.hf.space"
@@ -28,10 +29,12 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
 
     default_model = "phi-4-multimodal"
     default_vision_model = default_model
-    models = [default_model]
+    model_aliases = {"phi-4": default_vision_model}
+    vision_models = list(model_aliases.keys())
+    models = vision_models
 
     @classmethod
-    def run(cls, method: str, session: StreamSession, prompt: str, conversation: JsonConversation, images: list = None):
+    def run(cls, method: str, session: StreamSession, prompt: str, conversation: JsonConversation, media: list = None):
             headers = {
                 "content-type": "application/json",
                 "x-zerogpu-token": conversation.zerogpu_token,
@@ -46,7 +49,7 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
                             [],
                             {
                                 "text": prompt,
-                                "files": images,
+                                "files": media,
                             },
                             None
                         ],
@@ -69,7 +72,7 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
                                 {
                                     "role": "user",
                                     "content": {"file": image}
-                                } for image in images
+                                } for image in media
                             ]],
                         "event_data": None,
                         "fn_index": 11,
@@ -90,7 +93,7 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
         cls,
         model: str,
         messages: Messages,
-        images: ImagesType = None,
+        media: MediaListType = None,
         prompt: str = None,
         proxy: str = None,
         cookies: Cookies = None,
@@ -114,23 +117,23 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
             if return_conversation:
                 yield conversation
 
-            if images is not None:
+            if media is not None:
                 data = FormData()
-                mime_types = [None for i in range(len(images))]
-                for i in range(len(images)):
-                    mime_types[i] = is_data_an_wav(images[i][0], images[i][1])
-                    images[i] = (to_bytes(images[i][0]), images[i][1])
-                    mime_types[i] = is_accepted_format(images[i][0]) if mime_types[i] is None else mime_types[i]
-                for image, image_name in images:
+                mime_types = [None for i in range(len(media))]
+                for i in range(len(media)):
+                    mime_types[i] = is_data_an_audio(media[i][0], media[i][1])
+                    media[i] = (to_bytes(media[i][0]), media[i][1])
+                    mime_types[i] = is_accepted_format(media[i][0]) if mime_types[i] is None else mime_types[i]
+                for image, image_name in media:
                     data.add_field(f"files", to_bytes(image), filename=image_name)
                 async with session.post(f"{cls.api_url}/gradio_api/upload", params={"upload_id": session_hash}, data=data) as response:
                     await raise_for_status(response)
                     image_files = await response.json()
-                images = [{
+                media = [{
                     "path": image_file,
                     "url": f"{cls.api_url}/gradio_api/file={image_file}",
-                    "orig_name": images[i][1],
-                    "size": len(images[i][0]),
+                    "orig_name": media[i][1],
+                    "size": len(media[i][0]),
                     "mime_type": mime_types[i],
                     "meta": {
                         "_type": "gradio.FileData"
@@ -138,10 +141,10 @@ class Phi_4(AsyncGeneratorProvider, ProviderModelMixin):
                 } for i, image_file in enumerate(image_files)]
             
             
-            async with cls.run("predict", session, prompt, conversation, images) as response:
+            async with cls.run("predict", session, prompt, conversation, media) as response:
                 await raise_for_status(response)
 
-            async with cls.run("post", session, prompt, conversation, images) as response:
+            async with cls.run("post", session, prompt, conversation, media) as response:
                 await raise_for_status(response)
 
             async with cls.run("get", session, prompt, conversation) as response:

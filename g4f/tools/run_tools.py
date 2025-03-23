@@ -166,8 +166,16 @@ class ThinkingProcessor:
                 
             results.append(Reasoning(status="🤔 Is thinking...", is_thinking="<think>"))
             
-            if after and after[0]:
-                results.append(Reasoning(after[0]))
+            if after:
+                if "</think>" in after[0]:
+                    after, *after_end = after[0].split("</think>", 1)
+                    results.append(Reasoning(after))
+                    results.append(Reasoning(status="Finished", is_thinking="</think>"))
+                    if after_end:
+                        results.append(after_end[0])
+                    return 0, results
+                else:
+                    results.append(Reasoning(after[0]))
                 
             return time.time(), results
             
@@ -183,7 +191,8 @@ class ThinkingProcessor:
             status = f"Thought for {thinking_duration:.2f}s" if thinking_duration > 1 else "Finished"
             results.append(Reasoning(status=status, is_thinking="</think>"))
             
-            if after and after[0]:
+            # Make sure to handle text after the closing tag
+            if after and after[0].strip():
                 results.append(after[0])
                 
             return 0, results

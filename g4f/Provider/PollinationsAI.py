@@ -9,8 +9,8 @@ from aiohttp import ClientSession
 
 from .helper import filter_none, format_image_prompt
 from .base_provider import AsyncGeneratorProvider, ProviderModelMixin
-from ..typing import AsyncResult, Messages, ImagesType
-from ..image import to_data_uri
+from ..typing import AsyncResult, Messages, MediaListType
+from ..image import to_data_uri, is_data_an_audio, to_input_audio
 from ..errors import ModelNotFoundError
 from ..requests.raise_for_status import raise_for_status
 from ..requests.aiohttp import get_connector
@@ -21,13 +21,6 @@ DEFAULT_HEADERS = {
     "accept": "*/*",
     'accept-language': 'en-US,en;q=0.9',
     "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-    "priority": "u=1, i",
-    "sec-ch-ua": "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Linux\"",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-site",
     "referer": "https://pollinations.ai/",
     "origin": "https://pollinations.ai",
 }
@@ -71,6 +64,8 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
         "gemini-2.0": "gemini",
         "gemini-2.0-flash": "gemini",
         "gemini-2.0-flash-thinking": "gemini-thinking",
+        "deepseek-r1": "deepseek-r1-llama",
+        "gpt-4o-audio": "openai-audio",
         
         ### Image Models ###
         "sdxl-turbo": "turbo",
@@ -151,17 +146,25 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
         enhance: bool = False,
         safe: bool = False,
         # Text generation parameters
-        images: ImagesType = None,
+        media: MediaListType = None,
         temperature: float = None,
         presence_penalty: float = None,
         top_p: float = 1,
         frequency_penalty: float = None,
         response_format: Optional[dict] = None,
-        extra_parameters: list[str] = ["tools", "parallel_tool_calls", "tool_choice", "reasoning_effort", "logit_bias", "voice"],
+        extra_parameters: list[str] = ["tools", "parallel_tool_calls", "tool_choice", "reasoning_effort", "logit_bias", "voice", "modalities", "audio"],
         **kwargs
     ) -> AsyncResult:
         # Load model list
         cls.get_models()
+        if not model:
+            has_audio = "audio" in kwargs
+            if not has_audio and media is not None:
+                for media_data, filename in media:
+                    if is_data_an_audio(media_data, filename):
+                        has_audio = True
+                        break
+            model = next(iter(cls.audio_models)) if has_audio else model
         try:
             model = cls.get_model(model)
         except ModelNotFoundError:
@@ -187,7 +190,7 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
             async for result in cls._generate_text(
                 model=model,
                 messages=messages,
-                images=images,
+                media=media,
                 proxy=proxy,
                 temperature=temperature,
                 presence_penalty=presence_penalty,
@@ -244,7 +247,7 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
         cls,
         model: str,
         messages: Messages,
-        images: Optional[ImagesType],
+        media: MediaListType,
         proxy: str,
         temperature: float,
         presence_penalty: float,
@@ -263,16 +266,20 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
         if response_format and response_format.get("type") == "json_object":
             json_mode = True
 
-        if images and messages:
+        if media and messages:
             last_message = messages[-1].copy()
             image_content = [
                 {
-                    "type": "image_url",
-                    "image_url": {"url": to_data_uri(image)}
+                    "type": "input_audio",
+                    "input_audio": to_input_audio(media_data, filename)
                 }
-                for image, _ in images
+                if is_data_an_audio(media_data, filename) else {
+                    "type": "image_url",
+                    "image_url": {"url": to_data_uri(media_data)}
+                }
+                for media_data, filename in media
             ]
-            last_message["content"] = image_content + [{"type": "text", "text": last_message["content"]}]
+            last_message["content"] = image_content + ([{"type": "text", "text": last_message["content"]}] if isinstance(last_message["content"], str) else image_content)
             messages[-1] = last_message
 
         async with ClientSession(headers=DEFAULT_HEADERS, connector=get_connector(proxy=proxy)) as session:
