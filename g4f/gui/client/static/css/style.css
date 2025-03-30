@@ -1507,6 +1507,8 @@ form textarea {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    max-width: 800px; /* Set a maximum width for the chat box */
+    margin: 20px auto; /* Center the chat box and add margin to float it higher */
 }
 .chat-header {
     padding: 10px 28px;
@@ -1533,6 +1535,7 @@ form textarea {
     display: flex;
     padding: 4px 0;
     flex-direction: column;
+    margin-top: 10px; /* Adjust margin to float it higher */
 }
 .chat-footer input {
     flex: 1;
