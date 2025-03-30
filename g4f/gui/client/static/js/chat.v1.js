@@ -19,7 +19,7 @@ const providerSelect    = document.getElementById("provider");
 const modelSelect       = document.getElementById("model");
 const modelProvider     = document.getElementById("model2");
 const custom_model      = document.getElementById("model3");
-const chatPrompt        = document.getElementById("chatPrompt");
+const chatPrompt        = document.getElementById("chatPrompt");f
 const settings          = document.querySelector(".settings");
 const chat              = document.querySelector(".chat-container");
 const album             = document.querySelector(".images");
@@ -2488,32 +2488,6 @@ async function on_api() {
     const method = switchInput.checked ? "add" : "remove";
     searchButton.classList[method]("active");
     document.getElementById('recognition-language').placeholder = get_navigator_language();
-}
-
-async function load_version() {
-    let new_version = document.querySelector(".new_version");
-    if (new_version) return;
-    const versions = await api("version");
-    window.title = 'g4f - ' + versions["version"];
-    if (document.title == "g4f - gui") {
-        document.title = window.title;
-    }
-    let text = "version ~ "
-    if (versions["latest_version"] && versions["version"] != versions["latest_version"]) {
-        let release_url = 'https://github.com/xtekky/gpt4free/releases/latest';
-        let title = `New version: ${versions["latest_version"]}`;
-        text += `<a href="${release_url}" target="_blank" title="${title}">${versions["version"]}</a> 🆕`;
-        new_version = document.createElement("div");
-        new_version.classList.add("new_version");
-        const link = `<a href="${release_url}" target="_blank" title="${title}">v${versions["latest_version"]}</a>`;
-        new_version.innerHTML = `G4F ${link}&nbsp;&nbsp;🆕`;
-        new_version.addEventListener("click", ()=>new_version.parentElement.removeChild(new_version));
-        document.body.appendChild(new_version);
-    } else {
-        text += versions["version"];
-    }
-    document.getElementById("version_text").innerHTML = text
-    setTimeout(load_version, 1000 * 60 * 60); // 1 hour
 }
 
 function renderMediaSelect() {
