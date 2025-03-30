@@ -62,6 +62,7 @@ try:
     from .Pizzagpt             import Pizzagpt
     from .PollinationsAI       import PollinationsAI
     from .PollinationsImage    import PollinationsImage
+    from .PerchanceProvider    import PerchanceProvider 
     from .TeachAnything        import TeachAnything
     from .TypeGPT              import TypeGPT
     from .You                  import You
