@@ -40,6 +40,7 @@ try:
     from .Copilot              import Copilot
     from .DDG                  import DDG
     from .DeepInfraChat        import DeepInfraChat
+    from .DuckDuckGo           import DuckDuckGo
     from .Dynaspark            import Dynaspark
 except ImportError as e:
     debug.error("Providers not loaded (A-D):", e)
@@ -62,7 +63,6 @@ try:
     from .Pizzagpt             import Pizzagpt
     from .PollinationsAI       import PollinationsAI
     from .PollinationsImage    import PollinationsImage
-    from .PerchanceProvider    import PerchanceProvider 
     from .TeachAnything        import TeachAnything
     from .TypeGPT              import TypeGPT
     from .You                  import You
