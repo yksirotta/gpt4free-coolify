@@ -78,4 +78,4 @@ RUN mkdir -p $G4F_DIR/har_and_cookies $G4F_DIR/generated_images && \
 
 
 # Expose ports
-EXPOSE 10555 7900 1337
+EXPOSE 10666 7900 1337
